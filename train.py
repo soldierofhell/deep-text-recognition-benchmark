@@ -125,7 +125,7 @@ def train(opt):
 
         image_tensors, labels = train_dataset.get_batch()
         image = image_tensors.cuda()
-        text, length = converter.encode(labels)
+        text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
         batch_size = image.size(0)
 
         if 'CTC' in opt.Prediction:
@@ -135,7 +135,7 @@ def train(opt):
             cost = criterion(preds, text, preds_size, length)
 
         else:
-            preds = model(image, text)
+            preds = model(image, text[:, :-1]) # align with Attention.forward
             target = text[:, 1:]  # without [GO] Symbol
             cost = criterion(preds.view(-1, preds.shape[-1]), target.contiguous().view(-1))
 
@@ -225,6 +225,7 @@ if __name__ == '__main__':
     parser.add_argument('--character', type=str, default='0123456789abcdefghijklmnopqrstuvwxyz', help='character label')
     parser.add_argument('--sensitive', action='store_true', help='for sensitive character mode')
     parser.add_argument('--PAD', action='store_true', help='whether to keep ratio then pad for image resize')
+    parser.add_argument('--data_filtering_off', action='store_true', help='for data_filtering_off mode')
     """ Model Architecture """
     parser.add_argument('--Transformation', type=str, required=True, help='Transformation stage. None|TPS')
     parser.add_argument('--FeatureExtraction', type=str, required=True, help='FeatureExtraction stage. VGG|RCNN|ResNet')

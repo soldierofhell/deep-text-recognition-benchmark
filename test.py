@@ -85,7 +85,7 @@ def validation(model, criterion, evaluation_loader, converter, opt):
             length_for_pred = torch.cuda.IntTensor([opt.batch_max_length] * batch_size)
             text_for_pred = torch.cuda.LongTensor(batch_size, opt.batch_max_length + 1).fill_(0)
 
-            text_for_loss, length_for_loss = converter.encode(labels)
+            text_for_loss, length_for_loss = converter.encode(labels, batch_max_length=opt.batch_max_length)
 
         start_time = time.time()
         if 'CTC' in opt.Prediction:
@@ -203,6 +203,7 @@ if __name__ == '__main__':
     parser.add_argument('--character', type=str, default='0123456789abcdefghijklmnopqrstuvwxyz', help='character label')
     parser.add_argument('--sensitive', action='store_true', help='for sensitive character mode')
     parser.add_argument('--PAD', action='store_true', help='whether to keep ratio then pad for image resize')
+    parser.add_argument('--data_filtering_off', action='store_true', help='for data_filtering_off mode')
     """ Model Architecture """
     parser.add_argument('--Transformation', type=str, required=True, help='Transformation stage. None|TPS')
     parser.add_argument('--FeatureExtraction', type=str, required=True, help='FeatureExtraction stage. VGG|RCNN|ResNet')
