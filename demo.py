@@ -27,7 +27,7 @@ def demo(opt):
           opt.hidden_size, opt.num_class, opt.batch_max_length, opt.Transformation, opt.FeatureExtraction,
           opt.SequenceModeling, opt.Prediction)
 
-    model = torch.nn.DataParallel(model)
+    #model = torch.nn.DataParallel(model)
     if torch.cuda.is_available():
         model = model.cuda()
 
