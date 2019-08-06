@@ -7,7 +7,7 @@ import torch.utils.data
 
 from utils import CTCLabelConverter, AttnLabelConverter
 from dataset import RawDataset, AlignCollate
-from model import Model
+from model_jit import Model
 
 
 def demo(opt):
