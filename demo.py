@@ -66,7 +66,7 @@ def demo(opt):
             preds = model(image, text_for_pred, is_train=False)
             
             if opt.jit_save and batch_size==1:
-                traced_script_module = torch.jit.trace(lambda x : model(x[0], x[1], is_train=False), (image, text_for_pred))
+                traced_script_module = torch.jit.trace(lambda x,y : model(x, y, is_train=False), (image, text_for_pred))
                 traced_script_module.save("model.pt")
 
             # select max probabilty (greedy decoding) then decode index to character
