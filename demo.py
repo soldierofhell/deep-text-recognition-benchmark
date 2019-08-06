@@ -44,6 +44,7 @@ def demo(opt):
 
     # predict
     model.eval()
+    
     for image_tensors, image_path_list in demo_loader:
         batch_size = image_tensors.size(0)
         with torch.no_grad():
@@ -63,6 +64,10 @@ def demo(opt):
 
         else:
             preds = model(image, text_for_pred, is_train=False)
+            
+            if opt.jit_save and batch_size==1:
+                traced_script_module = torch.jit.trace(lambda x : model(x[0], x[1], is_train=False), (image, text_for_pred))
+                traced_script_module.save("model.pt")
 
             # select max probabilty (greedy decoding) then decode index to character
             _, preds_index = preds.max(2)
@@ -102,6 +107,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_channel', type=int, default=512,
                         help='the number of output channel of Feature extractor')
     parser.add_argument('--hidden_size', type=int, default=256, help='the size of the LSTM hidden state')
+    parser.add_argument('--jit_save', action='store_true', help='export to jit')
 
     opt = parser.parse_args()
 
