@@ -24,10 +24,10 @@ from modules.prediction import Attention
 
 class Model(nn.Module):
 
-    def __init__(self, opt):
+    def __init__(self):
         super(Model, self).__init__()
  
-        self.FeatureExtraction = ResNet_FeatureExtractor(opt.input_channel, opt.output_channel)
+        self.FeatureExtraction = ResNet_FeatureExtractor(3, 512)
 
     def forward(self, input, text, is_train=False):
 
