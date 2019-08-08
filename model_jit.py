@@ -28,16 +28,8 @@ class Model(nn.Module):
         super(Model, self).__init__()
  
         self.FeatureExtraction = ResNet_FeatureExtractor(opt.input_channel, opt.output_channel)
-        self.FeatureExtraction_output = opt.output_channel  # int(imgH/16-1) * 512
-        self.AdaptiveAvgPool = nn.AdaptiveAvgPool2d((None, 1))  # Transform final (imgH/16-1) -> 1
-        self.SequenceModeling_output = self.FeatureExtraction_output
-        self.Prediction = nn.Linear(self.SequenceModeling_output, opt.num_class)
 
     def forward(self, input, text, is_train=False):
 
         visual_feature = self.FeatureExtraction(input)
-        visual_feature = self.AdaptiveAvgPool(visual_feature.permute(0, 3, 1, 2))  # [b, c, h, w] -> [b, w, c, h]
-        visual_feature = visual_feature.squeeze(3)
-        contextual_feature = visual_feature  # for convenience. this is NOT contextually modeled by BiLSTM
-        prediction = self.Prediction(contextual_feature.contiguous())
-        return prediction
+        return visual_feature
