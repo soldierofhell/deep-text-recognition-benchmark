@@ -12,6 +12,7 @@ from nltk.metrics.distance import edit_distance
 from utils import CTCLabelConverter, AttnLabelConverter, Averager
 from dataset import hierarchical_dataset, AlignCollate
 from model import Model
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def benchmark_all_eval(model, criterion, converter, opt, calculate_infer_time=False):
@@ -67,9 +68,6 @@ def benchmark_all_eval(model, criterion, converter, opt, calculate_infer_time=Fa
 
 def validation(model, criterion, evaluation_loader, converter, opt):
     """ validation or evaluation """
-    for p in model.parameters():
-        p.requires_grad = False
-
     n_correct = 0
     norm_ED = 0
     length_of_data = 0
@@ -79,13 +77,12 @@ def validation(model, criterion, evaluation_loader, converter, opt):
     for i, (image_tensors, labels) in enumerate(evaluation_loader):
         batch_size = image_tensors.size(0)
         length_of_data = length_of_data + batch_size
-        with torch.no_grad():
-            image = image_tensors.cuda()
-            # For max length prediction
-            length_for_pred = torch.cuda.IntTensor([opt.batch_max_length] * batch_size)
-            text_for_pred = torch.cuda.LongTensor(batch_size, opt.batch_max_length + 1).fill_(0)
+        image = image_tensors.to(device)
+        # For max length prediction
+        length_for_pred = torch.IntTensor([opt.batch_max_length] * batch_size).to(device)
+        text_for_pred = torch.LongTensor(batch_size, opt.batch_max_length + 1).fill_(0).to(device)
 
-            text_for_loss, length_for_loss = converter.encode(labels, batch_max_length=opt.batch_max_length)
+        text_for_loss, length_for_loss = converter.encode(labels, batch_max_length=opt.batch_max_length)
 
         start_time = time.time()
         if 'CTC' in opt.Prediction:
@@ -95,7 +92,12 @@ def validation(model, criterion, evaluation_loader, converter, opt):
             # Calculate evaluation loss for CTC deocder.
             preds_size = torch.IntTensor([preds.size(1)] * batch_size)
             preds = preds.permute(1, 0, 2)  # to use CTCloss format
+
+            # To avoid ctc_loss issue, disabled cudnn for the computation of the ctc_loss
+            # https://github.com/jpuigcerver/PyLaia/issues/16
+            torch.backends.cudnn.enabled = False
             cost = criterion(preds, text_for_loss, preds_size, length_for_loss)
+            torch.backends.cudnn.enabled = True
 
             # Select max probabilty (greedy decoding) then decode index to character
             _, preds_index = preds.max(2)
@@ -150,7 +152,7 @@ def test(opt):
     print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
           opt.hidden_size, opt.num_class, opt.batch_max_length, opt.Transformation, opt.FeatureExtraction,
           opt.SequenceModeling, opt.Prediction)
-    model = torch.nn.DataParallel(model).cuda()
+    model = torch.nn.DataParallel(model).to(device)
 
     # load model
     print('loading pretrained model from %s' % opt.saved_model)
@@ -164,28 +166,29 @@ def test(opt):
 
     """ setup loss """
     if 'CTC' in opt.Prediction:
-        criterion = torch.nn.CTCLoss(zero_infinity=True).cuda()
+        criterion = torch.nn.CTCLoss(zero_infinity=True).to(device)
     else:
-        criterion = torch.nn.CrossEntropyLoss(ignore_index=0).cuda()  # ignore [GO] token = ignore index 0
+        criterion = torch.nn.CrossEntropyLoss(ignore_index=0).to(device)  # ignore [GO] token = ignore index 0
 
     """ evaluation """
     model.eval()
-    if opt.benchmark_all_eval:  # evaluation with 10 benchmark evaluation datasets
-        benchmark_all_eval(model, criterion, converter, opt)
-    else:
-        AlignCollate_evaluation = AlignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio_with_pad=opt.PAD)
-        eval_data = hierarchical_dataset(root=opt.eval_data, opt=opt)
-        evaluation_loader = torch.utils.data.DataLoader(
-            eval_data, batch_size=opt.batch_size,
-            shuffle=False,
-            num_workers=int(opt.workers),
-            collate_fn=AlignCollate_evaluation, pin_memory=True)
-        _, accuracy_by_best_model, _, _, _, _, _ = validation(
-            model, criterion, evaluation_loader, converter, opt)
+    with torch.no_grad():
+        if opt.benchmark_all_eval:  # evaluation with 10 benchmark evaluation datasets
+            benchmark_all_eval(model, criterion, converter, opt)
+        else:
+            AlignCollate_evaluation = AlignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio_with_pad=opt.PAD)
+            eval_data = hierarchical_dataset(root=opt.eval_data, opt=opt)
+            evaluation_loader = torch.utils.data.DataLoader(
+                eval_data, batch_size=opt.batch_size,
+                shuffle=False,
+                num_workers=int(opt.workers),
+                collate_fn=AlignCollate_evaluation, pin_memory=True)
+            _, accuracy_by_best_model, _, _, _, _, _ = validation(
+                model, criterion, evaluation_loader, converter, opt)
 
-        print(accuracy_by_best_model)
-        with open('./result/{0}/log_evaluation.txt'.format(opt.experiment_name), 'a') as log:
-            log.write(str(accuracy_by_best_model) + '\n')
+            print(accuracy_by_best_model)
+            with open('./result/{0}/log_evaluation.txt'.format(opt.experiment_name), 'a') as log:
+                log.write(str(accuracy_by_best_model) + '\n')
 
 
 if __name__ == '__main__':
