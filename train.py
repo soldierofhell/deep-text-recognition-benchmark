@@ -16,6 +16,7 @@ from utils import CTCLabelConverter, AttnLabelConverter, Averager
 from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
 from model import Model
 from test import validation
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 def train(opt):
@@ -63,7 +64,7 @@ def train(opt):
             continue
 
     # data parallel for multi-GPU
-    model = torch.nn.DataParallel(model).cuda()
+    model = torch.nn.DataParallel(model).to(device)
     model.train()
     if opt.continue_model != '':
         print(f'loading pretrained model from {opt.continue_model}')
@@ -73,9 +74,9 @@ def train(opt):
 
     """ setup loss """
     if 'CTC' in opt.Prediction:
-        criterion = torch.nn.CTCLoss(zero_infinity=True).cuda()
+        criterion = torch.nn.CTCLoss(zero_infinity=True).to(device)
     else:
-        criterion = torch.nn.CrossEntropyLoss(ignore_index=0).cuda()  # ignore [GO] token = ignore index 0
+        criterion = torch.nn.CrossEntropyLoss(ignore_index=0).to(device)  # ignore [GO] token = ignore index 0
     # loss averager
     loss_avg = Averager()
 
@@ -120,19 +121,21 @@ def train(opt):
 
     while(True):
         # train part
-        for p in model.parameters():
-            p.requires_grad = True
-
         image_tensors, labels = train_dataset.get_batch()
-        image = image_tensors.cuda()
+        image = image_tensors.to(device)
         text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
         batch_size = image.size(0)
 
         if 'CTC' in opt.Prediction:
             preds = model(image, text).log_softmax(2)
-            preds_size = torch.IntTensor([preds.size(1)] * batch_size)
+            preds_size = torch.IntTensor([preds.size(1)] * batch_size).to(device)
             preds = preds.permute(1, 0, 2)  # to use CTCLoss format
+
+            # To avoid ctc_loss issue, disabled cudnn for the computation of the ctc_loss
+            # https://github.com/jpuigcerver/PyLaia/issues/16
+            torch.backends.cudnn.enabled = False
             cost = criterion(preds, text, preds_size, length)
+            torch.backends.cudnn.enabled = True
 
         else:
             preds = model(image, text[:, :-1]) # align with Attention.forward
@@ -156,8 +159,9 @@ def train(opt):
                 loss_avg.reset()
 
                 model.eval()
-                valid_loss, current_accuracy, current_norm_ED, preds, labels, infer_time, length_of_data = validation(
-                    model, criterion, valid_loader, converter, opt)
+                with torch.no_grad():
+                    valid_loss, current_accuracy, current_norm_ED, preds, labels, infer_time, length_of_data = validation(
+                        model, criterion, valid_loader, converter, opt)
                 model.train()
 
                 for pred, gt in zip(preds[:5], labels[:5]):
