@@ -202,7 +202,7 @@ def test(opt):
                 
             with open('./result/{0}/log_details.txt'.format(opt.experiment_name), 'a') as log:
                 for path, label, pred, accuracy, edit_distance in zip(details['path'], details['label'], details['pred'], details['accuracy'], details['edit_distance']):
-                    log.write(','.join([path, label, pred, accuracy, edit_distance]) + '\n')
+                    log.write(','.join([path, label, pred, str(accuracy), str(edit_distance)]) + '\n')
 
 
 if __name__ == '__main__':
