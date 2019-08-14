@@ -193,12 +193,16 @@ def test(opt):
                 shuffle=False,
                 num_workers=int(opt.workers),
                 collate_fn=AlignCollate_evaluation, pin_memory=True)
-            _, accuracy_by_best_model, _, _, _, _, _, _ = validation(
+            _, accuracy_by_best_model, _, _, _, _, _, details = validation(
                 model, criterion, evaluation_loader, converter, opt)
 
             print(accuracy_by_best_model)
             with open('./result/{0}/log_evaluation.txt'.format(opt.experiment_name), 'a') as log:
                 log.write(str(accuracy_by_best_model) + '\n')
+                
+            with open('./result/{0}/log_details.txt'.format(opt.experiment_name), 'a') as log:
+                for path, label, pred, accuracy, edit_distance in zip(details['path'], details['label'], details['pred'], details['accuracy'], details['edit_distance']):
+                    log.write(','.join([path, label, pred, accuracy, edit_distance]) + '\n')
 
 
 if __name__ == '__main__':
