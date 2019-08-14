@@ -133,15 +133,15 @@ def validation(model, criterion, evaluation_loader, converter, opt):
                 gt = gt[:gt.find('[s]')]
 
             if pred == gt:
-                details['accuracy'] += 1
+                details['accuracy'] += [1]
                 n_correct += 1
             else:
-                details['accuracy'] += 0
+                details['accuracy'] += [0]
             if len(gt) == 0:
                 norm_ED += 1
             else:
                 norm_ED += edit_distance(pred, gt) / len(gt)
-            details['edit_distance'] += norm_ED
+            details['edit_distance'] += [norm_ED]
 
     accuracy = n_correct / float(length_of_data) * 100
 
