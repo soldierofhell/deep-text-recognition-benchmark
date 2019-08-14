@@ -73,6 +73,8 @@ def validation(model, criterion, evaluation_loader, converter, opt):
     length_of_data = 0
     infer_time = 0
     valid_loss_avg = Averager()
+    
+    details = {'path': [], 'label': [], 'pred': [], 'accuracy': [], 'edit_distance': []}
 
     for i, (image_tensors, labels, paths) in enumerate(evaluation_loader):
         batch_size = image_tensors.size(0)
@@ -117,8 +119,12 @@ def validation(model, criterion, evaluation_loader, converter, opt):
             preds_str = converter.decode(preds_index, length_for_pred)
             labels = converter.decode(text_for_loss[:, 1:], length_for_loss)
 
+        details['path'] += paths
+        details['label'] += labels
+        details['pred'] += preds_str
+        
         infer_time += forward_time
-        valid_loss_avg.add(cost)
+        valid_loss_avg.add(cost)       
 
         # calculate accuracy.
         for pred, gt in zip(preds_str, labels):
@@ -127,15 +133,19 @@ def validation(model, criterion, evaluation_loader, converter, opt):
                 gt = gt[:gt.find('[s]')]
 
             if pred == gt:
+                details['accuracy'] += 1
                 n_correct += 1
+            else:
+                details['accuracy'] += 0
             if len(gt) == 0:
                 norm_ED += 1
             else:
                 norm_ED += edit_distance(pred, gt) / len(gt)
+            details['edit_distance'] += norm_ED
 
     accuracy = n_correct / float(length_of_data) * 100
 
-    return valid_loss_avg.val(), accuracy, norm_ED, preds_str, labels, infer_time, length_of_data
+    return valid_loss_avg.val(), accuracy, norm_ED, preds_str, labels, infer_time, length_of_data, details
 
 
 def test(opt):
@@ -183,7 +193,7 @@ def test(opt):
                 shuffle=False,
                 num_workers=int(opt.workers),
                 collate_fn=AlignCollate_evaluation, pin_memory=True)
-            _, accuracy_by_best_model, _, _, _, _, _ = validation(
+            _, accuracy_by_best_model, _, _, _, _, _, _ = validation(
                 model, criterion, evaluation_loader, converter, opt)
 
             print(accuracy_by_best_model)
