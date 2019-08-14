@@ -67,23 +67,26 @@ class Batch_Balanced_Dataset(object):
     def get_batch(self):
         balanced_batch_images = []
         balanced_batch_texts = []
+        balanced_batch_paths = []
 
         for i, data_loader_iter in enumerate(self.dataloader_iter_list):
             try:
-                image, text = data_loader_iter.next()
+                image, text, path = data_loader_iter.next()
                 balanced_batch_images.append(image)
                 balanced_batch_texts += text
+                balanced_batch_paths += path
             except StopIteration:
                 self.dataloader_iter_list[i] = iter(self.data_loader_list[i])
-                image, text = self.dataloader_iter_list[i].next()
+                image, text, path = self.dataloader_iter_list[i].next()
                 balanced_batch_images.append(image)
                 balanced_batch_texts += text
+                balanced_batch_paths += path
             except ValueError:
                 pass
 
         balanced_batch_images = torch.cat(balanced_batch_images, 0)
 
-        return balanced_batch_images, balanced_batch_texts
+        return balanced_batch_images, balanced_batch_texts, balanced_batch_paths
 
 
 def hierarchical_dataset(root, opt, select_data='/'):
@@ -161,7 +164,9 @@ class LmdbDataset(Dataset):
             label = txn.get(label_key).decode('utf-8')
             img_key = 'image-%09d'.encode() % index
             imgbuf = txn.get(img_key)
-
+            path_key = 'path-%09d'.encode() % index
+            path = txn.get(path_key).decode('utf-8')
+            
             buf = six.BytesIO()
             buf.write(imgbuf)
             buf.seek(0)
@@ -187,7 +192,7 @@ class LmdbDataset(Dataset):
             out_of_char = f'[^{self.opt.character}]'
             label = re.sub(out_of_char, '', label)
 
-        return (img, label)
+        return (img, label, path)
 
 
 class RawDataset(Dataset):
@@ -270,7 +275,7 @@ class AlignCollate(object):
 
     def __call__(self, batch):
         batch = filter(lambda x: x is not None, batch)
-        images, labels = zip(*batch)
+        images, labels, paths = zip(*batch)
 
         if self.keep_ratio_with_pad:  # same concept with 'Rosetta' paper
             resized_max_w = self.imgW
@@ -296,7 +301,7 @@ class AlignCollate(object):
             image_tensors = [transform(image) for image in images]
             image_tensors = torch.cat([t.unsqueeze(0) for t in image_tensors], 0)
 
-        return image_tensors, labels
+        return image_tensors, labels, paths
 
 
 def tensor2im(image_tensor, imtype=np.uint8):
