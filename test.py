@@ -119,9 +119,7 @@ def validation(model, criterion, evaluation_loader, converter, opt):
             preds_str = converter.decode(preds_index, length_for_pred)
             labels = converter.decode(text_for_loss[:, 1:], length_for_loss)
 
-        details['path'] += paths
-        details['label'] += labels
-        details['pred'] += preds_str
+        details['path'] += paths        
         
         infer_time += forward_time
         valid_loss_avg.add(cost)       
@@ -131,6 +129,8 @@ def validation(model, criterion, evaluation_loader, converter, opt):
             if 'Attn' in opt.Prediction:
                 pred = pred[:pred.find('[s]')]  # prune after "end of sentence" token ([s])
                 gt = gt[:gt.find('[s]')]
+                details['label'] += [gt]
+                details['pred'] += [pred]
 
             if pred == gt:
                 details['accuracy'] += [1]
@@ -138,10 +138,11 @@ def validation(model, criterion, evaluation_loader, converter, opt):
             else:
                 details['accuracy'] += [0]
             if len(gt) == 0:
-                norm_ED += 1
+                ed = 1             
             else:
-                norm_ED += edit_distance(pred, gt) / len(gt)
-            details['edit_distance'] += [norm_ED]
+                ed = edit_distance(pred, gt) / len(gt)
+            norm_ED += ed
+            details['edit_distance'] += [ed]
 
     accuracy = n_correct / float(length_of_data) * 100
 
