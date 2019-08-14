@@ -160,7 +160,7 @@ def train(opt):
 
                 model.eval()
                 with torch.no_grad():
-                    valid_loss, current_accuracy, current_norm_ED, preds, labels, infer_time, length_of_data = validation(
+                    valid_loss, current_accuracy, current_norm_ED, preds, labels, infer_time, length_of_data, _ = validation(
                         model, criterion, valid_loader, converter, opt)
                 model.train()
 
