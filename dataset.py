@@ -127,10 +127,14 @@ class LmdbDataset(Dataset):
             self.nSamples = nSamples
 
             if self.opt.data_filtering_off:
-                # for fast check with no filtering
+                # for fast check or benchmark evaluation with no filtering
                 self.filtered_index_list = [index + 1 for index in range(self.nSamples)]
             else:
-                # Filtering
+                """ Filtering part
+                If you want to evaluate IC15-2077 & CUTE datasets which have special character labels,
+                use --data_filtering_off and evaluation with this snippet (only evaluate on alphabets and digits).
+                https://github.com/clovaai/deep-text-recognition-benchmark/blob/master/dataset.py#L186-L188
+                """
                 self.filtered_index_list = []
                 for index in range(self.nSamples):
                     index += 1  # lmdb starts with 1
@@ -279,7 +283,8 @@ class AlignCollate(object):
 
         if self.keep_ratio_with_pad:  # same concept with 'Rosetta' paper
             resized_max_w = self.imgW
-            transform = NormalizePAD((1, self.imgH, resized_max_w))
+            input_channel = 3 if images[0].mode == 'RGB' else 1
+            transform = NormalizePAD((input_channel, self.imgH, resized_max_w))
 
             resized_images = []
             for image in images:
