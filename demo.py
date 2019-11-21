@@ -4,6 +4,7 @@ import argparse
 import torch
 import torch.backends.cudnn as cudnn
 import torch.utils.data
+import torch.nn.functional as F
 
 from utils import CTCLabelConverter, AttnLabelConverter
 from dataset import RawDataset, AlignCollate
@@ -32,7 +33,9 @@ def demo(opt):
 
     # load model
     print('loading pretrained model from %s' % opt.saved_model)
-    #model.load_state_dict(torch.load(opt.saved_model))
+
+    model.load_state_dict(torch.load(opt.saved_model, map_location=device))
+
 
     # prepare data. two demo images from https://github.com/bgshih/crnn#run-demo
     AlignCollate_demo = AlignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio_with_pad=opt.PAD)
@@ -58,8 +61,8 @@ def demo(opt):
 
                 # Select max probabilty (greedy decoding) then decode index to character
                 preds_size = torch.IntTensor([preds.size(1)] * batch_size)
-                _, preds_index = preds.permute(1, 0, 2).max(2)
-                preds_index = preds_index.transpose(1, 0).contiguous().view(-1)
+                _, preds_index = preds.max(2)
+                preds_index = preds_index.view(-1)
                 preds_str = converter.decode(preds_index.data, preds_size.data)
 
         else:
@@ -76,13 +79,21 @@ def demo(opt):
                 preds_str = converter.decode(preds_index, length_for_pred)
 
             print('-' * 80)
-            print('image_path\tpredicted_labels')
+            print(f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score')
             print('-' * 80)
-            for img_name, pred in zip(image_path_list, preds_str):
+            preds_prob = F.softmax(preds, dim=2)
+            preds_max_prob, _ = preds_prob.max(dim=2)
+            for img_name, pred, pred_max_prob in zip(image_path_list, preds_str, preds_max_prob):
                 if 'Attn' in opt.Prediction:
-                    pred = pred[:pred.find('[s]')]  # prune after "end of sentence" token ([s])
+                    pred_EOS = pred.find('[s]')
+                    pred = pred[:pred_EOS]  # prune after "end of sentence" token ([s])
+                    pred_max_prob = pred_max_prob[:pred_EOS]
 
-                print(f'{img_name}\t{pred}')
+                # calculate confidence score (= multiply of pred_max_prob)
+                confidence_score = pred_max_prob.cumprod(dim=0)[-1]
+
+                # print(f'{img_name}\t{pred}\t{confidence_score:0.4f}')
+                print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
 
 
 if __name__ == '__main__':
