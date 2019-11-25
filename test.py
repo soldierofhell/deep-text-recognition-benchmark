@@ -126,7 +126,7 @@ def validation(model, criterion, evaluation_loader, converter, opt):
         preds_prob = F.softmax(preds, dim=2)
         preds_max_prob, _ = preds_prob.max(dim=2)
         confidence_score_list = []
-        for gt, pred, pred_max_prob in zip(labels, preds_str, preds_max_prob):
+        for gt, pred, pred_max_prob, path in zip(labels, preds_str, preds_max_prob, paths):
             if 'Attn' in opt.Prediction:
                 gt = gt[:gt.find('[s]')]
                 pred_EOS = pred.find('[s]')
@@ -152,7 +152,7 @@ def validation(model, criterion, evaluation_loader, converter, opt):
                 confidence_score = 0  # for empty pred case, when prune after "end of sentence" token ([s])
             confidence_score_list.append(confidence_score)
             # print(pred, gt, pred==gt, confidence_score)
-            results_file.write(f'{pred}, {gt}\n')
+            results_file.write(f'{path}, {pred}, {gt}, {pred == gt}, {ed}\n')
         
     results_file.close()
 
