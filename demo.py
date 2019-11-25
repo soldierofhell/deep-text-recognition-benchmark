@@ -49,6 +49,7 @@ def demo(opt):
     # predict
     model.eval()
     with torch.no_grad():
+        results_file = open(os.path.join(opt.results_path, 'results.txt'), 'w')
         for image_tensors, image_path_list in demo_loader:
             batch_size = image_tensors.size(0)
             image = image_tensors.to(device)
@@ -94,6 +95,8 @@ def demo(opt):
 
                 # print(f'{img_name}\t{pred}\t{confidence_score:0.4f}')
                 print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
+                results_file.write(f'{img_name},{pred:25s},{confidence_score:0.4f}\n'
+        results_file.close()
 
 
 if __name__ == '__main__':
@@ -120,7 +123,8 @@ if __name__ == '__main__':
     parser.add_argument('--output_channel', type=int, default=512,
                         help='the number of output channel of Feature extractor')
     parser.add_argument('--hidden_size', type=int, default=256, help='the size of the LSTM hidden state')
-    parser.add_argument('--jit_save', action='store_true', help='export to jit')
+                  
+    parser.add_argument('--results_path', required=True, help="path to save results")
 
     opt = parser.parse_args()
 
