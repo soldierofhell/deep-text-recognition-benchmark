@@ -51,7 +51,7 @@ def demo(opt):
     model.eval()
     with torch.no_grad():
         results_file = open(os.path.join(opt.results_path, 'results.txt'), 'w')
-        for image_tensors, image_path_list in demo_loader:
+        for image_tensors, image_path_list, _ in demo_loader:
             batch_size = image_tensors.size(0)
             image = image_tensors.to(device)
             # For max length prediction
