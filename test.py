@@ -76,6 +76,8 @@ def validation(model, criterion, evaluation_loader, converter, opt):
     valid_loss_avg = Averager()
     
     details = {'path': [], 'label': [], 'pred': [], 'accuracy': [], 'edit_distance': []}
+    
+    results_file = open(os.path.join(opt.results_path, 'results.txt'), 'w')
 
     for i, (image_tensors, labels, paths) in enumerate(evaluation_loader):
         batch_size = image_tensors.size(0)
@@ -150,6 +152,10 @@ def validation(model, criterion, evaluation_loader, converter, opt):
                 confidence_score = 0  # for empty pred case, when prune after "end of sentence" token ([s])
             confidence_score_list.append(confidence_score)
             # print(pred, gt, pred==gt, confidence_score)
+            
+           results_file.write(f'{pred, {gt}\n')
+        
+    results_file.close()
 
     accuracy = n_correct / float(length_of_data) * 100
 
@@ -239,6 +245,8 @@ if __name__ == '__main__':
     parser.add_argument('--output_channel', type=int, default=512,
                         help='the number of output channel of Feature extractor')
     parser.add_argument('--hidden_size', type=int, default=256, help='the size of the LSTM hidden state')
+                                 
+    parser.add_argument('--results_path', required=True, help="path to save results")
 
     opt = parser.parse_args()
 
