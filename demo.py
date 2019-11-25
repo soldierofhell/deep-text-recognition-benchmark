@@ -50,7 +50,7 @@ def demo(opt):
     # predict
     model.eval()
     with torch.no_grad():
-        results_file = open(os.path.join(opt.results_path, 'results.txt'), 'w')
+        results_file = open(os.path.join(opt.results_path, 'results.txt'), 'wb')
         for image_tensors, image_path_list in demo_loader:
             batch_size = image_tensors.size(0)
             image = image_tensors.to(device)
