@@ -49,7 +49,7 @@ def demo(opt):
     # predict
     model.eval()
     with torch.no_grad():
-        results_file = open(os.path.join(opt.results_path, 'results.txt'), 'w')
+        results_file = open(os.path.join(opt.results_file, 'results.txt'), 'w')
         for image_tensors, image_path_list in demo_loader:
             batch_size = image_tensors.size(0)
             image = image_tensors.to(device)
@@ -66,14 +66,8 @@ def demo(opt):
                 preds_index = preds_index.view(-1)
                 preds_str = converter.decode(preds_index.data, preds_size.data)
 
-        else:
-            preds = model(image, text_for_pred, is_train=False)
-            
-            if opt.jit_save and batch_size==1:
-                with torch.no_grad():
-                    pass
-                    #traced_script_module = torch.jit.trace(lambda x,y : model(x, y, is_train=False), (image, text_for_pred))
-                    #traced_script_module.save("/content/model.pt")
+            else:
+                preds = model(image, text_for_pred, is_train=False)
 
                 # select max probabilty (greedy decoding) then decode index to character
                 _, preds_index = preds.max(2)
