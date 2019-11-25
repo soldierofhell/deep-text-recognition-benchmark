@@ -152,7 +152,7 @@ def validation(model, criterion, evaluation_loader, converter, opt):
                 confidence_score = 0  # for empty pred case, when prune after "end of sentence" token ([s])
             confidence_score_list.append(confidence_score)
             # print(pred, gt, pred==gt, confidence_score)
-            results_file.write(f'{path}, {pred}, {gt}, {pred == gt}, {ed}\n')
+            results_file.write(f'{path}, {gt}, {pred}, {pred == gt}, {ed}, {confidence_score}\n')
         
     results_file.close()
 
