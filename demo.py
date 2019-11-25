@@ -89,7 +89,7 @@ def demo(opt):
 
                 # print(f'{img_name}\t{pred}\t{confidence_score:0.4f}')
                 print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
-                results_file.write(f'{img_name},{pred:25s},{confidence_score:0.4f}\n'
+                results_file.write(f'{img_name},{pred:25s},{confidence_score:0.4f}\n')
         results_file.close()
 
 
