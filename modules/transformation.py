@@ -105,17 +105,17 @@ class GridGenerator(nn.Module):
 
     def _build_C(self, F):
         """ Return coordinates of fiducial points in I_r; C """
-        ctrl_pts_x = np.linspace(-1.0, 1.0, int(F / 2))
-        ctrl_pts_y_top = -1 * np.ones(int(F / 2))
-        ctrl_pts_y_bottom = np.ones(int(F / 2))
-        ctrl_pts_top = np.stack([ctrl_pts_x, ctrl_pts_y_top], axis=1)
-        ctrl_pts_bottom = np.stack([ctrl_pts_x, ctrl_pts_y_bottom], axis=1)
-        C = np.concatenate([ctrl_pts_top, ctrl_pts_bottom], axis=0)
+        ctrl_pts_x = torch.linspace(-1.0, 1.0, int(F / 2))
+        ctrl_pts_y_top = -1 * torch.ones(int(F / 2))
+        ctrl_pts_y_bottom = torch.ones(int(F / 2))
+        ctrl_pts_top = torch.stack([ctrl_pts_x, ctrl_pts_y_top], axis=1)
+        ctrl_pts_bottom = torch.stack([ctrl_pts_x, ctrl_pts_y_bottom], axis=1)
+        C = torch.cat([ctrl_pts_top, ctrl_pts_bottom], axis=0)
         return C  # F x 2
 
     def _build_inv_delta_C(self, F, C):
         """ Return inv_delta_C which is needed to calculate T """
-        hat_C = np.zeros((F, F), dtype=float)  # F x F
+        hat_C = torch.zeros((F, F), dtype=float)  # F x F
         for i in range(0, F):
             for j in range(i, F):
                 r = np.linalg.norm(C[i] - C[j])
