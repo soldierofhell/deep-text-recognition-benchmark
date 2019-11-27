@@ -28,7 +28,6 @@ class TPS_SpatialTransformerNetwork(nn.Module):
 
     def forward(self, batch_I):
         batch_C_prime = self.LocalizationNetwork(batch_I)  # batch_size x K x 2
-        print(batch_C_prime)
         build_P_prime = self.GridGenerator.build_P_prime(batch_C_prime)  # batch_size x n (= I_r_width x I_r_height) x 2
         build_P_prime_reshape = build_P_prime.reshape([build_P_prime.size(0), self.I_r_size[0], self.I_r_size[1], 2])
         batch_I_r = F.grid_sample(batch_I, build_P_prime_reshape, padding_mode='border')
@@ -160,6 +159,7 @@ class GridGenerator(nn.Module):
         batch_size = batch_C_prime.size(0)
         batch_inv_delta_C = self.inv_delta_C.repeat(batch_size, 1, 1)
         batch_P_hat = self.P_hat.repeat(batch_size, 1, 1)
+        print(batch_C_prime.device)
         batch_C_prime_with_zeros = torch.cat((batch_C_prime, torch.zeros(
             batch_size, 3, 2).float()), dim=1)  # batch_size x F+3 x 2 # .to(device)
         batch_T = torch.bmm(batch_inv_delta_C, batch_C_prime_with_zeros)  # batch_size x F+3 x 2
