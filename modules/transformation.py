@@ -60,13 +60,19 @@ class LocalizationNetwork(nn.Module):
         # Init fc2 in LocalizationNetwork
         self.localization_fc2.weight.data.fill_(0)
         """ see RARE paper Fig. 6 (a) """
-        ctrl_pts_x = np.linspace(-1.0, 1.0, int(F / 2))
-        ctrl_pts_y_top = np.linspace(0.0, -1.0, num=int(F / 2))
-        ctrl_pts_y_bottom = np.linspace(1.0, 0.0, num=int(F / 2))
-        ctrl_pts_top = np.stack([ctrl_pts_x, ctrl_pts_y_top], axis=1)
-        ctrl_pts_bottom = np.stack([ctrl_pts_x, ctrl_pts_y_bottom], axis=1)
-        initial_bias = np.concatenate([ctrl_pts_top, ctrl_pts_bottom], axis=0)
-        self.localization_fc2.bias.data = torch.from_numpy(initial_bias).float().view(-1)
+        #ctrl_pts_x = np.linspace(-1.0, 1.0, int(F / 2))
+        #ctrl_pts_y_top = np.linspace(0.0, -1.0, num=int(F / 2))
+        #ctrl_pts_y_bottom = np.linspace(1.0, 0.0, num=int(F / 2))
+        #ctrl_pts_top = np.stack([ctrl_pts_x, ctrl_pts_y_top], axis=1)
+        #ctrl_pts_bottom = np.stack([ctrl_pts_x, ctrl_pts_y_bottom], axis=1)
+        #initial_bias = np.concatenate([ctrl_pts_top, ctrl_pts_bottom], axis=0)
+        ctrl_pts_x = torch.linspace(-1.0, 1.0, int(F / 2))
+        ctrl_pts_y_top = torch.linspace(0.0, -1.0, int(F / 2))
+        ctrl_pts_y_bottom = torch.linspace(1.0, 0.0, int(F / 2))
+        ctrl_pts_top = torch.stack([ctrl_pts_x, ctrl_pts_y_top], axis=1)
+        ctrl_pts_bottom = torch.stack([ctrl_pts_x, ctrl_pts_y_bottom], axis=1)
+        initial_bias = torch.cat([ctrl_pts_top, ctrl_pts_bottom], axis=0)
+        self.localization_fc2.bias.data = initial_bias.view(-1) # torch.from_numpy(initial_bias).float().view(-1)
 
     def forward(self, batch_I):
         """
