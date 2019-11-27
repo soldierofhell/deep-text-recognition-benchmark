@@ -1,4 +1,4 @@
-import numpy as np
+#import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -28,6 +28,7 @@ class TPS_SpatialTransformerNetwork(nn.Module):
 
     def forward(self, batch_I):
         batch_C_prime = self.LocalizationNetwork(batch_I)  # batch_size x K x 2
+        print(batch_C_prime)
         build_P_prime = self.GridGenerator.build_P_prime(batch_C_prime)  # batch_size x n (= I_r_width x I_r_height) x 2
         build_P_prime_reshape = build_P_prime.reshape([build_P_prime.size(0), self.I_r_size[0], self.I_r_size[1], 2])
         batch_I_r = F.grid_sample(batch_I, build_P_prime_reshape, padding_mode='border')
