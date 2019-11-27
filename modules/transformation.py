@@ -115,20 +115,22 @@ class GridGenerator(nn.Module):
 
     def _build_inv_delta_C(self, F, C):
         """ Return inv_delta_C which is needed to calculate T """
-        hat_C = torch.zeros((F, F), dtype=float)  # F x F
+        #hat_C = torch.zeros((F, F), dtype=float)  # F x F
+        hat_C = torch.eye((F,F), dtype=torch.float)
         for i in range(0, F):
             for j in range(i, F):
-                r = np.linalg.norm(C[i] - C[j])
-                hat_C[i, j] = r
-                hat_C[j, i] = r
-        np.fill_diagonal(hat_C, 1)
-        hat_C = (hat_C ** 2) * np.log(hat_C)
+                if i!=j:
+                    r = torch.norm(C[i] - C[j]) #np.linalg.norm(C[i] - C[j])
+                    hat_C[i, j] = r
+                    hat_C[j, i] = r
+        #np.fill_diagonal(hat_C, 1)
+        hat_C = torch.mm(torch.pow(hat_C,2), torch.log(hat_C)) #(hat_C ** 2) * np.log(hat_C)
         # print(C.shape, hat_C.shape)
-        delta_C = np.concatenate(  # F+3 x F+3
+        delta_C = torch.cat(  # F+3 x F+3
             [
-                np.concatenate([np.ones((F, 1)), C, hat_C], axis=1),  # F x F+3
-                np.concatenate([np.zeros((2, 3)), np.transpose(C)], axis=1),  # 2 x F+3
-                np.concatenate([np.zeros((1, 3)), np.ones((1, F))], axis=1)  # 1 x F+3
+                torch.cat([torch.ones((F, 1)), C, hat_C], axis=1),  # F x F+3
+                torch.cat([torch.zeros((2, 3)), torch.transpose(C)], axis=1),  # 2 x F+3
+                torch.cat([torch.zeros((1, 3)), torch.ones((1, F))], axis=1)  # 1 x F+3
             ],
             axis=0
         )
