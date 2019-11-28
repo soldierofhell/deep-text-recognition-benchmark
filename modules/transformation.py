@@ -148,7 +148,7 @@ class GridGenerator(nn.Module):
 
     def _build_P_hat(self, F, C, P):
         n = P.shape[0]  # n (= self.I_r_width x self.I_r_height)
-        P_tile = torch.repeat(torch.unsqueeze(P, axis=1), (1, F, 1))  # n x 2 -> n x 1 x 2 -> n x F x 2
+        P_tile = torch.unsqueeze(P, axis=1).repeat(1, F, 1)  # n x 2 -> n x 1 x 2 -> n x F x 2
         C_tile = torch.unsqueeze(C, axis=0)  # 1 x F x 2
         P_diff = P_tile - C_tile  # n x F x 2
         rbf_norm = torch.norm(P_diff, p=2, dim=2, keepdims=False)  # n x F
