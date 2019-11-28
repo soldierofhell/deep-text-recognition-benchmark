@@ -1,4 +1,4 @@
-import numpy as np
+#import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -134,14 +134,14 @@ class GridGenerator(nn.Module):
             ],
             axis=0
         )
-        inv_delta_C = np.linalg.inv(delta_C)
+        inv_delta_C = torch.inverse(delta_C)
         return inv_delta_C  # F+3 x F+3
 
     def _build_P(self, I_r_width, I_r_height):
-        I_r_grid_x = (np.arange(-I_r_width, I_r_width, 2) + 1.0) / I_r_width  # self.I_r_width
-        I_r_grid_y = (np.arange(-I_r_height, I_r_height, 2) + 1.0) / I_r_height  # self.I_r_height
+        I_r_grid_x = (torch.arange(-I_r_width, I_r_width, 2) + 1.0) / I_r_width  # self.I_r_width
+        I_r_grid_y = (torch.arange(-I_r_height, I_r_height, 2) + 1.0) / I_r_height  # self.I_r_height
         P = np.stack(  # self.I_r_width x self.I_r_height x 2
-            np.meshgrid(I_r_grid_x, I_r_grid_y),
+            torch.meshgrid(I_r_grid_x, I_r_grid_y),
             axis=2
         )
         return P.reshape([-1, 2])  # n (= self.I_r_width x self.I_r_height) x 2
