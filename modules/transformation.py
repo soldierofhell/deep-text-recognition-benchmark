@@ -129,7 +129,7 @@ class GridGenerator(nn.Module):
         delta_C = torch.cat(  # F+3 x F+3
             [
                 torch.cat([torch.ones((F, 1)), C, hat_C], axis=1),  # F x F+3
-                torch.cat([torch.zeros((2, 3)), torch.transpose(C)], axis=1),  # 2 x F+3
+                torch.cat([torch.zeros((2, 3)), torch.t(C)], axis=1),  # 2 x F+3
                 torch.cat([torch.zeros((1, 3)), torch.ones((1, F))], axis=1)  # 1 x F+3
             ],
             axis=0
