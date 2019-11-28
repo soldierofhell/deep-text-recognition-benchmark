@@ -140,7 +140,7 @@ class GridGenerator(nn.Module):
     def _build_P(self, I_r_width, I_r_height):
         I_r_grid_x = (torch.arange(-I_r_width, I_r_width, 2) + 1.0) / I_r_width  # self.I_r_width
         I_r_grid_y = (torch.arange(-I_r_height, I_r_height, 2) + 1.0) / I_r_height  # self.I_r_height
-        P = np.stack(  # self.I_r_width x self.I_r_height x 2
+        P = torch.stack(  # self.I_r_width x self.I_r_height x 2
             torch.meshgrid(I_r_grid_x, I_r_grid_y),
             axis=2
         )
