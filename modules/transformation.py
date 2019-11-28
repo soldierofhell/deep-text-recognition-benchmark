@@ -151,7 +151,7 @@ class GridGenerator(nn.Module):
         P_tile = torch.unsqueeze(P, axis=1).repeat(1, F, 1)  # n x 2 -> n x 1 x 2 -> n x F x 2
         C_tile = torch.unsqueeze(C, axis=0)  # 1 x F x 2
         P_diff = P_tile - C_tile  # n x F x 2
-        rbf_norm = torch.norm(P_diff, p=2, dim=2, keepdims=False)  # n x F
+        rbf_norm = torch.norm(P_diff, p=2, dim=2, keepdim=False)  # n x F
         rbf = torch.mul(torch.sqt(rbf_norm), torch.log(rbf_norm + self.eps))  # n x F
         P_hat = torch.cat([torch.ones((n, 1)), P, rbf], axis=1)
         return P_hat  # n x F+3
