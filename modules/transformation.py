@@ -116,7 +116,7 @@ class GridGenerator(nn.Module):
     def _build_inv_delta_C(self, F, C):
         """ Return inv_delta_C which is needed to calculate T """
         #hat_C = torch.zeros((F, F), dtype=float)  # F x F
-        hat_C = torch.eye((F,F), dtype=torch.float)
+        hat_C = torch.eye(F, dtype=torch.float)
         for i in range(0, F):
             for j in range(i, F):
                 if i!=j:
