@@ -73,6 +73,8 @@ class LocalizationNetwork(nn.Module):
         ctrl_pts_bottom = torch.stack([ctrl_pts_x, ctrl_pts_y_bottom], axis=1)
         initial_bias = torch.cat([ctrl_pts_top, ctrl_pts_bottom], axis=0)
         self.localization_fc2.bias.data = initial_bias.view(-1) # torch.from_numpy(initial_bias).float().view(-1)
+        
+        print('localization: ', ctrl_pts_x.device)
 
     def forward(self, batch_I):
         """
@@ -82,8 +84,7 @@ class LocalizationNetwork(nn.Module):
         batch_size = batch_I.size(0)
         
         zeros = torch.zeros(batch_size, 3, 2, dtype=torch.float)
-        print('localization: ', zeros.device)
-        print('localization: ', self.ctrl_pts_x.device)
+        print('localization: ', zeros.device)        
         
         features = self.conv(batch_I).view(batch_size, -1)
         batch_C_prime = self.localization_fc2(self.localization_fc1(features)).view(batch_size, self.F, 2)
