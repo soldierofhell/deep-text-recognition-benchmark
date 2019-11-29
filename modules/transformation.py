@@ -162,7 +162,7 @@ class GridGenerator(nn.Module):
         batch_size = batch_C_prime.size(0)
         batch_inv_delta_C = self.inv_delta_C.repeat(batch_size, 1, 1)
         batch_P_hat = self.P_hat.repeat(batch_size, 1, 1)
-        #print(batch_C_prime.device)
+        print(batch_P_hat.device)
         zeros = torch.zeros(batch_size, 3, 2, dtype=torch.float, device=batch_C_prime.device)
         #print(zeros.device)
         batch_C_prime_with_zeros = torch.cat((batch_C_prime, zeros), dim=1)  # batch_size x F+3 x 2 # .to(device)
