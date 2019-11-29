@@ -80,7 +80,7 @@ class LocalizationNetwork(nn.Module):
         output:    batch_C_prime : Predicted coordinates of fiducial points for input batch [batch_size x F x 2]
         """
         batch_size = batch_I.size(0)
-        print('batch_I device: ': batch_I.device)
+        print('batch_I device: ', batch_I.device)
         features = self.conv(batch_I).view(batch_size, -1)
         batch_C_prime = self.localization_fc2(self.localization_fc1(features)).view(batch_size, self.F, 2)
         return batch_C_prime
