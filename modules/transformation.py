@@ -81,7 +81,7 @@ class LocalizationNetwork(nn.Module):
         """
         batch_size = batch_I.size(0)
         
-        zeros = torch.zeros(batch_size, 3, 2, dtype=torch.float, device=batch_C_prime.device)
+        zeros = torch.zeros(batch_size, 3, 2, dtype=torch.float)
         print('localization: ', zeros.device)
         print('localization: ', self.ctrl_pts_x.device)
         
