@@ -80,7 +80,6 @@ class LocalizationNetwork(nn.Module):
         output:    batch_C_prime : Predicted coordinates of fiducial points for input batch [batch_size x F x 2]
         """
         batch_size = batch_I.size(0)
-        print('batch_I device: ', batch_I.device)
         features = self.conv(batch_I).view(batch_size, -1)
         batch_C_prime = self.localization_fc2(self.localization_fc1(features)).view(batch_size, self.F, 2)
         return batch_C_prime
@@ -126,7 +125,6 @@ class GridGenerator(nn.Module):
                     hat_C[j, i] = r
         #np.fill_diagonal(hat_C, 1)
         hat_C = torch.mm(torch.pow(hat_C,2), torch.log(hat_C)) #(hat_C ** 2) * np.log(hat_C)
-        # print(C.shape, hat_C.shape)
         delta_C = torch.cat(  # F+3 x F+3
             [
                 torch.cat([torch.ones((F, 1)), C, hat_C], axis=1),  # F x F+3
@@ -162,9 +160,7 @@ class GridGenerator(nn.Module):
         batch_size = batch_C_prime.size(0)
         batch_inv_delta_C = self.inv_delta_C.repeat(batch_size, 1, 1)
         batch_P_hat = self.P_hat.repeat(batch_size, 1, 1)
-        print(batch_P_hat.device)
         zeros = torch.zeros(batch_size, 3, 2, dtype=torch.float, device=batch_C_prime.device)
-        #print(zeros.device)
         batch_C_prime_with_zeros = torch.cat((batch_C_prime, zeros), dim=1)  # batch_size x F+3 x 2 # .to(device)
         batch_T = torch.bmm(batch_inv_delta_C, batch_C_prime_with_zeros)  # batch_size x F+3 x 2
         batch_P_prime = torch.bmm(batch_P_hat, batch_T)  # batch_size x n x 2
