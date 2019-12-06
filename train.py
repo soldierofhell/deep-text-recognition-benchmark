@@ -76,7 +76,7 @@ def train(opt):
         if opt.FT:
             model_state_dict = torch.load(opt.saved_model)
             if opt.imgW != 100: # disable GridGenerator
-                for old_key in model_state_dict.keys():
+                for old_key in list(model_state_dict.keys()):
                   if old_key.startswith('module.Transformation.GridGenerator'):
                       new_key = '_' + old_key
                       model_state_dict[new_key] = model_state_dict.pop(old_key)
