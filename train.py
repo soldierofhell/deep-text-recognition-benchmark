@@ -74,7 +74,13 @@ def train(opt):
     if opt.saved_model != '':
         print(f'loading pretrained model from {opt.saved_model}')
         if opt.FT:
-            model.load_state_dict(torch.load(opt.saved_model), strict=False)
+            model_state_dict = torch.load(opt.saved_model)
+            if opt.imgW != 100: # disable GridGenerator
+                for old_key in model_state_dict.keys():
+                  if old_key.startswith('module.Transformation.GridGenerator'):
+                      new_key = '_' + old_key
+                      model_state_dict[new_key] = model_state_dict.pop(old_key)
+            model.load_state_dict(model_state_dict, strict=False)
         else:
             model.load_state_dict(torch.load(opt.saved_model))
     print("Model:")
