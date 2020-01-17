@@ -80,6 +80,11 @@ def train(opt):
                   if old_key.startswith('module.Transformation.GridGenerator'):
                       new_key = '_' + old_key
                       model_state_dict[new_key] = model_state_dict.pop(old_key)
+            if opt.character != '0123456789abcdefghijklmnopqrstuvwxyz': # disable GridGenerator
+                for old_key in list(model_state_dict.keys()):
+                  if old_key.startswith('module.Prediction.attention_cell.rnn') or old_key.startswith('module.Prediction.generator'):
+                      new_key = '_' + old_key
+                      model_state_dict[new_key] = model_state_dict.pop(old_key)
             model.load_state_dict(model_state_dict, strict=False)
         else:
             model.load_state_dict(torch.load(opt.saved_model))
