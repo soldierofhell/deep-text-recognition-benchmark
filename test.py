@@ -78,7 +78,7 @@ def validation(model, criterion, evaluation_loader, converter, opt):
     details = {'path': [], 'label': [], 'pred': [], 'accuracy': [], 'edit_distance': []}
     
     results_file = open(os.path.join(opt.results_path, 'results.txt'), 'w')
-    results_file.write('PATH, GT, PRED, CORRECT, ED, CONFIDENCE_SCORE\n')
+    results_file.write('PATH,GT,PRED,CORRECT,ED,CONFIDENCE_SCORE\n')
 
     for i, (image_tensors, labels, paths) in enumerate(evaluation_loader):
         batch_size = image_tensors.size(0)
