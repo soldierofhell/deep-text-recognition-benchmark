@@ -34,6 +34,8 @@ class Attention(nn.Module):
         hidden = (torch.FloatTensor(batch_size, self.hidden_size).fill_(0).to(device),
                   torch.FloatTensor(batch_size, self.hidden_size).fill_(0).to(device))
 
+        print('is_train: ', is_train)
+        
         if is_train:
             for i in range(num_steps):
                 # one-hot vectors for a i-th char. in a batch
