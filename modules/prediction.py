@@ -34,6 +34,7 @@ class Attention(nn.Module):
         hidden = (torch.FloatTensor(batch_size, self.hidden_size).fill_(0).to(device),
                   torch.FloatTensor(batch_size, self.hidden_size).fill_(0).to(device))
 
+        is_train = False
             
         if is_train:
             print('is_train: ', is_train)
