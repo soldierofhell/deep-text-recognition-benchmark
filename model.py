@@ -67,7 +67,7 @@ class Model(nn.Module):
         else:
             raise Exception('Prediction is neither CTC or Attn')
 
-    def forward(self, input, text=None, is_train=True):
+    def forward(self, input, text=None, is_train=False):
         """ Transformation stage """
         if not self.stages['Trans'] == "None":
             input = self.Transformation(input)
