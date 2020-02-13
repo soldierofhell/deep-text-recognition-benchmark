@@ -28,7 +28,7 @@ class Options:
 
 class TextPredictor:
 
-  def __init__(opt):
+  def __init__(): # (opt)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     opt = Options()
