@@ -33,8 +33,8 @@ class TextPredictor:
 
     opt = Options()
 
-    converter = AttnLabelConverter(opt.character)
-    opt.num_class = len(converter.character)
+    self.converter = AttnLabelConverter(opt.character)
+    opt.num_class = len(self.converter.character)
 
     model_state_dict = torch.load(opt.saved_model)
     for old_key in list(model_state_dict.keys()):
@@ -71,7 +71,7 @@ class TextPredictor:
 
       preds = self.model(image, text_for_pred, is_train=False)
       _, preds_index = preds.max(2)
-      pred = converter.decode(preds_index, length_for_pred)[0]
+      pred = self.converter.decode(preds_index, length_for_pred)[0]
 
       preds_prob = F.softmax(preds, dim=2)
       preds_max_prob, _ = preds_prob.max(dim=2)
