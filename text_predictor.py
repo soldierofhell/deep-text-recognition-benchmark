@@ -63,7 +63,7 @@ class TextPredictor:
       image.sub_(0.5).div_(0.5) # normalization
       image = image.unsqueeze(0) # batch dimension
 
-      batch_size = crop.size(0)
+      batch_size = image.size(0)
 
       image = image.cuda()
       length_for_pred = torch.IntTensor([2] * batch_size).cuda()
