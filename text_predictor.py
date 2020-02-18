@@ -42,11 +42,11 @@ class TextPredictor:
       model_state_dict[new_key] = model_state_dict.pop(old_key)
 
     with torch.no_grad():
-      model = Model(opt)
+      self.model = Model(opt)
 
-      model.load_state_dict(model_state_dict) # , map_location=device
-      model = model.to(device)
-      model.eval()
+      self.model.load_state_dict(model_state_dict) # , map_location=device
+      self.model = model.to(device)
+      self.model.eval()
 
   def predict(self, image, input_size):    
 
@@ -69,7 +69,7 @@ class TextPredictor:
       length_for_pred = torch.IntTensor([2] * batch_size).cuda()
       text_for_pred = torch.LongTensor(batch_size, 2 + 1).fill_(0).cuda()
 
-      preds = model(image, text_for_pred, is_train=False)
+      preds = self.model(image, text_for_pred, is_train=False)
       _, preds_index = preds.max(2)
       pred = converter.decode(preds_index, length_for_pred)[0]
 
