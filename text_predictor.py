@@ -23,7 +23,7 @@ class Options:
     self.PAD = False
     self.rgb = False
     self.batch_max_length = 2
-    self.saved_model = '/content/drive/My Drive/respo/ocr/best_accuracy.pth'
+    self.saved_model = '/content/best_accuracy.pth'
     self.image_folder = '/content/numbers/val'
 
 class TextPredictor:
