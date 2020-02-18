@@ -4,8 +4,8 @@ import torch
 import torch.nn.functional as F
 from torchvision import transforms
 
-from model import Model
-from utils import AttnLabelConverter
+from .model import Model
+from .utils import AttnLabelConverter
 
 class Options:
   def __init__(self):
