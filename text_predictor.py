@@ -45,7 +45,7 @@ class TextPredictor:
       self.model = Model(opt)
 
       self.model.load_state_dict(model_state_dict) # , map_location=device
-      self.model = model.to(device)
+      self.model = self.model.to(device)
       self.model.eval()
 
   def predict(self, image, input_size):    
