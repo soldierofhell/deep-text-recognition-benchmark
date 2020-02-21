@@ -22,6 +22,7 @@ try:
     from .modules.sequence_modeling import BidirectionalLSTM
     from .modules.prediction import Attention
 except ImportError:
+    print('relative import failed')
     try:
         from modules.transformation import TPS_SpatialTransformerNetwork
         from modules.feature_extraction import VGG_FeatureExtractor, RCNN_FeatureExtractor, ResNet_FeatureExtractor
