@@ -54,7 +54,7 @@ class TextPredictor:
 
     with torch.no_grad():
       # if crop is tensor:
-      image = transforms.ToPILImage()(image).convert("L")
+      image = transforms.ToPILImage()(image.cpu()).convert("L")
       # else if opencv:
       # ... opencv -> PIL
 
