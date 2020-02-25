@@ -83,13 +83,13 @@ class TextPredictor:
         
         for i, j in [(0,0), (1,0), (0,1), (1,1)]:
             
-          pred_index = torch.stack((pred_indices_1[:,i], pred_indices_2[:,j]), dim=1).squeeze()
-          pred_values = torch.stack((pred_values_1[:,i], pred_values_2[:,j]), dim=1).squeeze()
+          pred_index = torch.stack((pred_indices_1[:,i], pred_indices_2[:,j]), dim=1)
+          pred_values = torch.stack((pred_values_1[:,i], pred_values_2[:,j]), dim=1)
 
           pred = self.converter.decode(pred_index, length_for_pred)[0]
           pred_EOS = pred.find('[s]')
           pred = pred[:pred_EOS]
-          pred_max_prob = pred_values[:pred_EOS]
+          pred_max_prob = pred_values[0][:pred_EOS]
           print('pred_max_prob: ', pred_index, pred_values, pred, pred_max_prob, pred_EOS)
           
           confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
