@@ -69,17 +69,33 @@ class TextPredictor:
       length_for_pred = torch.IntTensor([2] * batch_size).cuda()
       text_for_pred = torch.LongTensor(batch_size, 2 + 1).fill_(0).cuda()
 
-      preds = self.model(image, text_for_pred, is_train=False)
-      _, preds_index = preds.max(2)
-      pred = self.converter.decode(preds_index, length_for_pred)[0]
+      preds = self.model(image, text_for_pred, is_train=False) # batch_size x 2 x num_class
+      
+      if dictionary:
+        preds_prob = F.softmax(preds, dim=2)
+        
+        pred_values_1, pred_indices_1 = torch.kthvalue(preds_prob, preds_prob.size()[2])
+        pred_values_2, pred_indices_2 = torch.kthvalue(preds_prob, preds_prob.size()[2]-1)
+        
+        pred = self.converter.decode(preds_index, length_for_pred)[0]
 
-      preds_prob = F.softmax(preds, dim=2)
-      preds_max_prob, _ = preds_prob.max(dim=2)
-      pred_max_prob = preds_max_prob[0]
+        pred_EOS = pred.find('[s]')
+        pred = pred[:pred_EOS]
+        pred_max_prob = pred_max_prob[:pred_EOS]
+        confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
+        
+      else:     
+      
+        _, preds_index = preds.max(2)
+        pred = self.converter.decode(preds_index, length_for_pred)[0]
 
-      pred_EOS = pred.find('[s]')
-      pred = pred[:pred_EOS]
-      pred_max_prob = pred_max_prob[:pred_EOS]
-      confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
+        preds_prob = F.softmax(preds, dim=2)
+        preds_max_prob, _ = preds_prob.max(dim=2)
+        pred_max_prob = preds_max_prob[0]
+
+        pred_EOS = pred.find('[s]')
+        pred = pred[:pred_EOS]
+        pred_max_prob = pred_max_prob[:pred_EOS]
+        confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
 
     return pred, confidence_score
