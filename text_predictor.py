@@ -85,8 +85,11 @@ class TextPredictor:
           pred = self.converter.decode(preds_index, length_for_pred)[0]
           pred_EOS = pred.find('[s]')
           pred = pred[:pred_EOS]
-          pred_pred_values = pred_values[:pred_EOS]
+          pred_max_prob = pred_values[:pred_EOS]
           confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
+          
+          if pred in dictionary:
+            break
         
       else:     
       
