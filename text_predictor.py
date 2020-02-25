@@ -81,8 +81,8 @@ class TextPredictor:
         
         for i, j in [(0,0), (1,0), (0,1), (1,1)]:
             
-          pred_index = torch.stack(pred_indices_1[:,i], pred_indices_2[:,j], dim=1)
-          pred_values = torch.stack(pred_values_1[:,i], pred_values_2[:,j], dim=1)
+          pred_index = torch.stack((pred_indices_1[:,i], pred_indices_2[:,j]), dim=1)
+          pred_values = torch.stack((pred_values_1[:,i], pred_values_2[:,j]), dim=1)
 
           pred = self.converter.decode(preds_index, length_for_pred)[0]
           pred_EOS = pred.find('[s]')
