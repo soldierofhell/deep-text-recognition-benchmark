@@ -77,12 +77,16 @@ class TextPredictor:
         pred_values_1, pred_indices_1 = torch.kthvalue(preds_prob, preds_prob.size()[2])
         pred_values_2, pred_indices_2 = torch.kthvalue(preds_prob, preds_prob.size()[2]-1)
         
-        pred = self.converter.decode(preds_index, length_for_pred)[0]
+        for i, j in [(0,0), (1,0), (0,1), (1,1)]:
+            
+          pred_index = torch.stack(pred_indices_1[:,i], pred_indices_2[:,j], dim=1)
+          pred_values = torch.stack(pred_values_1[:,i], pred_values_2[:,j], dim=1)
 
-        pred_EOS = pred.find('[s]')
-        pred = pred[:pred_EOS]
-        pred_max_prob = pred_max_prob[:pred_EOS]
-        confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
+          pred = self.converter.decode(preds_index, length_for_pred)[0]
+          pred_EOS = pred.find('[s]')
+          pred = pred[:pred_EOS]
+          pred_pred_values = pred_values[:pred_EOS]
+          confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
         
       else:     
       
