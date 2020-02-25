@@ -48,7 +48,7 @@ class TextPredictor:
       self.model = self.model.to(device)
       self.model.eval()
 
-  def predict(self, image, input_size):    
+  def predict(self, image, input_size, dictionary):    
 
     with torch.no_grad():
       # if crop is tensor:
