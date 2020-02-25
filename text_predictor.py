@@ -90,7 +90,7 @@ class TextPredictor:
           pred_EOS = pred.find('[s]')
           pred = pred[:pred_EOS]
           pred_max_prob = pred_values[:pred_EOS]
-          print('pred_max_prob: ', pred, pred_max_prob, pred_EOS)
+          print('pred_max_prob: ', pred_index, pred_values, pred, pred_max_prob, pred_EOS)
           
           confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
           
