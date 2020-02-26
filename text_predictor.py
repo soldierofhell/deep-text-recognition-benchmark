@@ -88,6 +88,9 @@ class TextPredictor:
 
           pred = self.converter.decode(pred_index, length_for_pred)[0]
           pred_EOS = pred.find('[s]')
+          if pred_EOS == 0:
+            pred, confidence_score = None, None
+            break
           pred = pred[:pred_EOS]
           pred_max_prob = pred_values[0][:pred_EOS]
           print('pred_max_prob: ', pred_index, pred_values, pred, pred_max_prob, pred_EOS)
