@@ -97,6 +97,10 @@ class TextPredictor:
           
           confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
           
+          if confidence_score < 0.7:
+            pred, confidence_score = None, None
+            continue
+          
           if pred in dictionary:
             print(f'Number {pred} found on the list with confidence {confidence_score}, id: {i},{j}')
             break
