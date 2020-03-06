@@ -73,7 +73,9 @@ class TextPredictor:
 
       preds = self.model(image, text_for_pred, is_train=False) # batch_size x 2 x num_class
       
-      if dictionary:
+      multiple_check = False
+      
+      if multiple_check:
         preds_prob = F.softmax(preds, dim=2)
         
         pred_values_1, pred_indices_1 = torch.kthvalue(preds_prob, preds_prob.size()[2])
@@ -105,8 +107,8 @@ class TextPredictor:
             print(f'Number {pred} found on the list with confidence {confidence_score}, id: {i},{j}')
             break
         
-      else:     
-      
+      else:
+        
         _, preds_index = preds.max(2)
         pred = self.converter.decode(preds_index, length_for_pred)[0]
 
@@ -118,5 +120,8 @@ class TextPredictor:
         pred = pred[:pred_EOS]
         pred_max_prob = pred_max_prob[:pred_EOS]
         confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
+                  
+        if confidence_score < 0.7 or pred not in dictionary::
+          pred, confidence_score = None, None
 
     return pred, confidence_score
