@@ -121,7 +121,7 @@ class TextPredictor:
         pred_max_prob = pred_max_prob[:pred_EOS]
         confidence_score = pred_max_prob.cumprod(dim=0)[-1].item()
                   
-        if confidence_score < 0.7 or pred not in dictionary::
+        if confidence_score < 0.7 or pred not in dictionary:
           pred, confidence_score = None, None
 
     return pred, confidence_score
