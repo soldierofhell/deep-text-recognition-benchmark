@@ -50,7 +50,7 @@ class TextPredictor:
 
   def predict(self, image, input_size, dictionary):
     
-    print('image size for text prediction: ', image.size())
+    #print('image size for text prediction: ', image.size())
 
     with torch.no_grad():
       # if crop is tensor:
@@ -104,7 +104,7 @@ class TextPredictor:
             continue
           
           if pred in dictionary:
-            print(f'Number {pred} found on the list with confidence {confidence_score}, id: {i},{j}')
+            #print(f'Number {pred} found on the list with confidence {confidence_score}, id: {i},{j}')
             break
         
       else:
