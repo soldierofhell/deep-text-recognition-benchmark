@@ -28,13 +28,15 @@ class Options:
 
 class TextPredictor:
 
-  def __init__(self): # (opt)
+  def __init__(self, checkpoint_path): # (opt)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     opt = Options()
 
     self.converter = AttnLabelConverter(opt.character)
     opt.num_class = len(self.converter.character)
+    
+    opt.saved_model = checkpoint_path
 
     model_state_dict = torch.load(opt.saved_model)
     for old_key in list(model_state_dict.keys()):
